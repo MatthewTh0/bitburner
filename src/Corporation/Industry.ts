@@ -41,7 +41,7 @@ export class Industry implements IIndustry {
 
   /* The following are factors for how much production/other things are increased by
        different factors. The production increase always has diminishing returns,
-       and they are all reprsented by exponentials of < 1 (e.g x ^ 0.5, x ^ 0.8)
+       and they are all represented by exponentials of < 1 (e.g x ^ 0.5, x ^ 0.8)
        The number for these represent the exponential. A lower number means more
        diminishing returns */
   reFac = 0; //Real estate Factor
@@ -391,7 +391,7 @@ export class Industry implements IIndustry {
     this.state = state;
 
     //At the start of a cycle, store and reset revenue/expenses
-    //Then calculate salaries and processs the markets
+    //Then calculate salaries and process the markets
     if (state === "START") {
       if (isNaN(this.thisCycleRevenue) || isNaN(this.thisCycleExpenses)) {
         console.error("NaN in Corporation's computed revenue/expenses");
@@ -694,35 +694,35 @@ export class Industry implements IIndustry {
               warehouse.smartSupplyStore += prod / (CorporationConstants.SecsPerMarketCycle * marketCycles);
 
               // Make sure we have enough resource to make our materials
-              let producableFrac = 1;
+              let producibleFrac = 1;
               for (const reqMatName of Object.keys(this.reqMats)) {
                 if (this.reqMats.hasOwnProperty(reqMatName)) {
                   const reqMat = this.reqMats[reqMatName];
                   if (reqMat === undefined) continue;
                   const req = reqMat * prod;
                   if (warehouse.materials[reqMatName].qty < req) {
-                    producableFrac = Math.min(producableFrac, warehouse.materials[reqMatName].qty / req);
+                    producibleFrac = Math.min(producibleFrac, warehouse.materials[reqMatName].qty / req);
                   }
                 }
               }
-              if (producableFrac <= 0) {
-                producableFrac = 0;
+              if (producibleFrac <= 0) {
+                producibleFrac = 0;
                 prod = 0;
               }
 
-              // Make our materials if they are producable
-              if (producableFrac > 0 && prod > 0) {
+              // Make our materials if they are producible
+              if (producibleFrac > 0 && prod > 0) {
                 for (const reqMatName of Object.keys(this.reqMats)) {
                   const reqMat = this.reqMats[reqMatName];
                   if (reqMat === undefined) continue;
-                  const reqMatQtyNeeded = reqMat * prod * producableFrac;
+                  const reqMatQtyNeeded = reqMat * prod * producibleFrac;
                   warehouse.materials[reqMatName].qty -= reqMatQtyNeeded;
                   warehouse.materials[reqMatName].prd = 0;
                   warehouse.materials[reqMatName].prd -=
                     reqMatQtyNeeded / (CorporationConstants.SecsPerMarketCycle * marketCycles);
                 }
                 for (let j = 0; j < this.prodMats.length; ++j) {
-                  warehouse.materials[this.prodMats[j]].qty += prod * producableFrac;
+                  warehouse.materials[this.prodMats[j]].qty += prod * producibleFrac;
                   warehouse.materials[this.prodMats[j]].qlt =
                     office.employeeProd[EmployeePositions.Engineer] / 90 +
                     Math.pow(this.sciResearch.qty, this.sciFac) +
@@ -737,7 +737,7 @@ export class Industry implements IIndustry {
               }
 
               //Per second
-              const fooProd = (prod * producableFrac) / (CorporationConstants.SecsPerMarketCycle * marketCycles);
+              const fooProd = (prod * producibleFrac) / (CorporationConstants.SecsPerMarketCycle * marketCycles);
               for (let fooI = 0; fooI < this.prodMats.length; ++fooI) {
                 warehouse.materials[this.prodMats[fooI]].prd = fooProd;
               }
@@ -942,7 +942,7 @@ export class Industry implements IIndustry {
 
                       // Make sure theres enough space in warehouse
                       if (expWarehouse.sizeUsed >= expWarehouse.size) {
-                        // Warehouse at capacity. Exporting doesnt
+                        // Warehouse at capacity. Exporting doesn't
                         // affect revenue so just return 0's
                         return [0, 0];
                       } else {
@@ -1086,32 +1086,32 @@ export class Industry implements IIndustry {
             warehouse.smartSupplyStore += prod / (CorporationConstants.SecsPerMarketCycle * marketCycles);
 
             //Make sure we have enough resources to make our Products
-            let producableFrac = 1;
+            let producibleFrac = 1;
             for (const reqMatName of Object.keys(product.reqMats)) {
               if (product.reqMats.hasOwnProperty(reqMatName)) {
                 const req = product.reqMats[reqMatName] * prod;
                 if (warehouse.materials[reqMatName].qty < req) {
-                  producableFrac = Math.min(producableFrac, warehouse.materials[reqMatName].qty / req);
+                  producibleFrac = Math.min(producibleFrac, warehouse.materials[reqMatName].qty / req);
                 }
               }
             }
 
-            //Make our Products if they are producable
-            if (producableFrac > 0 && prod > 0) {
+            //Make our Products if they are producible
+            if (producibleFrac > 0 && prod > 0) {
               for (const reqMatName of Object.keys(product.reqMats)) {
                 if (product.reqMats.hasOwnProperty(reqMatName)) {
-                  const reqMatQtyNeeded = product.reqMats[reqMatName] * prod * producableFrac;
+                  const reqMatQtyNeeded = product.reqMats[reqMatName] * prod * producibleFrac;
                   warehouse.materials[reqMatName].qty -= reqMatQtyNeeded;
                   warehouse.materials[reqMatName].prd -=
                     reqMatQtyNeeded / (CorporationConstants.SecsPerMarketCycle * marketCycles);
                 }
               }
               //Quantity
-              product.data[city][0] += prod * producableFrac;
+              product.data[city][0] += prod * producibleFrac;
             }
 
             //Keep track of production Per second
-            product.data[city][1] = (prod * producableFrac) / (CorporationConstants.SecsPerMarketCycle * marketCycles);
+            product.data[city][1] = (prod * producibleFrac) / (CorporationConstants.SecsPerMarketCycle * marketCycles);
             break;
           }
           case "SALE": {
@@ -1140,7 +1140,7 @@ export class Industry implements IIndustry {
               // Reverse engineer the 'maxSell' formula
               // 1. Set 'maxSell' = prod
               // 2. Substitute formula for 'markup'
-              // 3. Solve for 'sCost'roduct.pCost = sCost
+              // 3. Solve for 'sCost' = product.pCost
               const numerator = markupLimit;
               const sqrtNumerator = prod;
               const sqrtDenominator =
@@ -1355,7 +1355,7 @@ export class Industry implements IIndustry {
     const researchTree = IndustryResearchTrees[this.type];
     if (researchTree === undefined) throw new Error(`Invalid industry "${this.type}"`);
 
-    // Since ResearchTree data isnt saved, we'll update the Research Tree data
+    // Since ResearchTree data isn't saved, we'll update the Research Tree data
     // based on the stored 'researched' property in the Industry object
     if (Object.keys(researchTree.researched).length !== Object.keys(this.researched).length) {
       for (const research of Object.keys(this.researched)) {
@@ -1443,7 +1443,7 @@ export class Industry implements IIndustry {
   }
 
   /**
-   * Initiatizes a Industry object from a JSON save state.
+   * Initializes a Industry object from a JSON save state.
    */
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   static fromJSON(value: any): Industry {
